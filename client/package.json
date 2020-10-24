@@ -1,0 +1,40 @@
+{
+  "name": "intense-inquiries-client",
+  "version": "0.1.0",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "author": "Ethan Smith",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onebytegone/intense-inquiries.git"
+  },
+  "bugs": {
+    "url": "https://github.com/onebytegone/intense-inquiries/issues"
+  },
+  "homepage": "https://github.com/onebytegone/intense-inquiries#readme",
+  "dependencies": {
+    "core-js": "3.6.5",
+    "vue": "3.0.2"
+  },
+  "devDependencies": {
+    "@silvermine/eslint-config": "3.0.0-rc.0",
+    "@typescript-eslint/eslint-plugin": "2.34.0",
+    "@typescript-eslint/parser": "2.34.0",
+    "@vue/cli-plugin-babel": "4.5.8",
+    "@vue/cli-plugin-eslint": "4.5.8",
+    "@vue/cli-plugin-typescript": "4.5.8",
+    "@vue/cli-service": "4.5.8",
+    "@vue/compiler-sfc": "3.0.2",
+    "@vue/eslint-config-typescript": "5.1.0",
+    "eslint": "6.8.0",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-vue": "7.1.0",
+    "node-sass": "4.14.1",
+    "sass-loader": "8.0.2",
+    "typescript": "3.9.7"
+  }
+}

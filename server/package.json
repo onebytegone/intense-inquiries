@@ -1,0 +1,39 @@
+{
+   "name": "intense-inquiries-server",
+   "version": "0.1.0",
+   "description": "",
+   "scripts": {
+      "lint": "eslint './src/**/*.ts'",
+      "lint-fix": "eslint --fix './src/**/*.ts'"
+   },
+   "author": "Ethan Smith",
+   "license": "MIT",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/onebytegone/intense-inquiries.git"
+   },
+   "bugs": {
+      "url": "https://github.com/onebytegone/intense-inquiries/issues"
+   },
+   "homepage": "https://github.com/onebytegone/intense-inquiries#readme",
+   "devDependencies": {
+      "@commitlint/cli": "8.3.5",
+      "@commitlint/config-conventional": "8.3.4",
+      "@silvermine/eslint-config": "3.0.0-rc.0",
+      "@silvermine/typescript-config": "0.10.0",
+      "@types/node": "8.10.36",
+      "check-node-version": "4.0.2",
+      "cz-conventional-changelog": "2.1.0",
+      "eslint": "7.12.0",
+      "source-map-support": "0.5.16",
+      "ts-node": "7.0.1",
+      "tslib": "1.9.3",
+      "typescript": "3.2.2"
+   },
+   "dependencies": {},
+   "config": {
+      "commitizen": {
+         "path": "./node_modules/cz-conventional-changelog"
+      }
+   }
+}
