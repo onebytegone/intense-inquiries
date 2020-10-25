@@ -79,9 +79,12 @@ export default defineComponent({
    -moz-osx-font-smoothing: grayscale;
    display: flex;
    justify-content: center;
-   color: #2c3e50;
+   color: #263238;
    font-size: 2em;
    margin: 0 1em;
+}
+.color-green {
+   color: #4caf50;
 }
 form {
    display: flex;
@@ -102,9 +105,19 @@ input {
 button {
    padding: 0.5em 0;
    width: 100%;
+   -webkit-appearance: none;
+   -moz-appearance: none;
+   border: 0;
+   border-radius: 4px;
+   background-color: #3672ad;
+   color: #ffffff;
+   font-size: 0.9em;
+   &:hover {
+      background-color: #214972;
+   }
 }
 h3 {
-   color: #848a90;
+   color: #9e9e9e;
    margin: 0.5em 0;
 }
 li {
