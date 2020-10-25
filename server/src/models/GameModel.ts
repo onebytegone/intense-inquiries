@@ -61,7 +61,7 @@ export class GameModel {
    }
 
    public async step(): Promise<void> {
-      if (this.status === GameStatus.Lobby && this._readyPlayers.size >= this._players.size / 2 && this._players.size >= 3) {
+      if (this.status === GameStatus.Lobby && this._readyPlayers.size >= this._players.size && this._players.size >= 3) {
          this._status = GameStatus.Question;
          this._activeQuestion = this._remainingQuestions.pop();
          this._answers.clear();
@@ -79,7 +79,7 @@ export class GameModel {
          });
          this._readyPlayers.clear();
       // eslint-disable-next-line max-len
-      } else if (this.status === GameStatus.Reveal && this._readyPlayers.size >= this._players.size / 2 && this._remainingQuestions.length > 0) {
+      } else if (this.status === GameStatus.Reveal && this._readyPlayers.size >= this._players.size && this._remainingQuestions.length > 0) {
          this._status = GameStatus.Question;
          this._activeQuestion = this._remainingQuestions.pop();
          this._answers.clear();
