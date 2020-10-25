@@ -4,8 +4,9 @@
       <h1>{{ game.code }}</h1>
       <h3>Players</h3>
       <ul>
-         <li v-for="player in game.players" :key="player.name">
+         <li v-for="player in players" :key="player.name">
             {{ player.name }}
+            <font-awesome-icon class="color-green" icon="check-circle" v-if="player.ready" />
          </li>
          <li v-show="game.players.length === 0">
             No players yet :(
@@ -17,8 +18,12 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { GameStatus } from '../../../lib/shared-types';
+import { GameStatus, Player } from '../../../lib/shared-types';
 import gameService from '../lib/game-service';
+
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+library.add(faCheckCircle);
 
 export default defineComponent({
 
@@ -28,6 +33,24 @@ export default defineComponent({
       return {
          isHost: gameService.isHost,
          game: gameService.game,
+
+         players: computed(() => {
+            const game = gameService.game.value;
+
+            if (!game || game.status !== GameStatus.Lobby) {
+               return;
+            }
+
+            const playersReady = game.playersReady.map((player) => {
+               return player.id;
+            });
+
+            return game.players.map((player: Player) => {
+               return Object.assign({
+                  ready: playersReady.includes(player.id),
+               }, player);
+            });
+         }),
 
          isReady: computed(() => {
             const game = gameService.game.value;

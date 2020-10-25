@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/onebytegone/intense-inquiries#readme",
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "1.2.32",
+    "@fortawesome/free-solid-svg-icons": "5.15.1",
+    "@fortawesome/vue-fontawesome": "3.0.0-2",
     "core-js": "3.6.5",
     "socket.io-client": "2.3.1",
     "vue": "3.0.2"
