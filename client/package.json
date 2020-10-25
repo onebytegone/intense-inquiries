@@ -18,10 +18,12 @@
   "homepage": "https://github.com/onebytegone/intense-inquiries#readme",
   "dependencies": {
     "core-js": "3.6.5",
+    "socket.io-client": "2.3.1",
     "vue": "3.0.2"
   },
   "devDependencies": {
     "@silvermine/eslint-config": "3.0.0-rc.0",
+    "@types/socket.io-client": "1.4.34",
     "@typescript-eslint/eslint-plugin": "2.34.0",
     "@typescript-eslint/parser": "2.34.0",
     "@vue/cli-plugin-babel": "4.5.8",
