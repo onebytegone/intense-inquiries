@@ -34,10 +34,15 @@ export class GameModel {
       return this._players.all();
    }
 
-   public addPlayer(player: PlayerModel): void {
+   public addPlayer(player: PlayerModel): boolean {
       if (this.status === GameStatus.Lobby) {
+         if (this._players.findByProp('socketID', player.socketID) || this._players.findByProp('name', player.name)) {
+            return false;
+         }
+
          this._players.add(player);
       }
+      return true;
    }
 
    public findPlayerWithSocketID(socketID: string): PlayerModel | undefined {

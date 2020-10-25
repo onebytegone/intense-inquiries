@@ -82,10 +82,12 @@ io.on('connection', (socket: TypedSocket<ClientEvents, ServerEvents>) => {
          return;
       }
 
-      // TODO: Don't allow duplicate player names
-      game.addPlayer(new PlayerModel(socket.id, data.name));
-      socket.join(game.id);
-      updateAllAssociatedWithGame(game);
+      const success = game.addPlayer(new PlayerModel(socket.id, data.name));
+
+      if (success) {
+         socket.join(game.id);
+         updateAllAssociatedWithGame(game);
+      }
    });
 
    socket.on('submitReady', async () => {
