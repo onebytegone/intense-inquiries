@@ -110,4 +110,15 @@ h3 {
 li {
    margin: 0.25em 0;
 }
+.submitted {
+   display: flex;
+   justify-content: center;
+   list-style-type: none;
+   margin: 0;
+   padding: 0;
+   li {
+      margin: 0.5em;
+      padding: 0;
+   }
+}
 </style>

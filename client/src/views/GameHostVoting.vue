@@ -33,15 +33,5 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-.submitted {
-   display: flex;
-   justify-content: center;
-   list-style-type: none;
-   margin: 0;
-   padding: 0;
-   li {
-      margin: 0.5em;
-      padding: 0;
-   }
-}
+
 </style>

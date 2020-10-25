@@ -2,7 +2,7 @@
    <div>
       <h3>Question:</h3>
       <h1>{{ game.question }}</h1>
-      <ul>
+      <ul class="submitted">
          <li v-for="player in game.playersDone" :key="player.id">
             {{ player.name }}
          </li>
