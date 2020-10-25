@@ -135,7 +135,9 @@ io.on('connection', (socket: TypedSocket<ClientEvents, ServerEvents>) => {
             const success = game.removePlayerWithSocketID(socket.id);
 
             if (success) {
-               updateAllAssociatedWithGame(game);
+               game.step().then(() => {
+                  updateAllAssociatedWithGame(game);
+               });
             }
          }
       });
