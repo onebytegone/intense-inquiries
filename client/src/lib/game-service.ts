@@ -32,14 +32,6 @@ const exposed = {
 
    game,
 
-   state: computed(() => {
-      if (game.value === null) {
-         return 'noGame';
-      }
-
-      return 'waitingForPlayers';
-   }),
-
    hostGame: () => {
       socket.emit('hostGame', {});
    },
