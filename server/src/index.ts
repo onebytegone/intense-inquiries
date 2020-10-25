@@ -7,7 +7,7 @@ import { GameModel } from './models/GameModel';
 import { PlayerModel } from './models/PlayerModel';
 
 const app = express(),
-      port = 3000,
+      port = process.env.PORT || 3000,
       server = new http.Server(app),
       io = socketio(server) as TypedServer<ServerEvents>;
 
@@ -17,7 +17,7 @@ app.get('/', (_req, res) => {
    });
 });
 
-server.listen(3000, () => {
+server.listen(port, () => {
    // eslint-disable-next-line no-console
    console.log(`Listening on port ${port}`);
 });
