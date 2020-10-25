@@ -4,6 +4,7 @@ import socketio from 'socket.io';
 import { ClientEvents, ServerEvents, GameStatus } from '../../lib/shared-types';
 import getQuestionList from './lib/get-question-list';
 import { GameModel } from './models/GameModel';
+import { ModelStore } from './models/ModelStore';
 import { PlayerModel } from './models/PlayerModel';
 
 const app = express(),
@@ -35,24 +36,21 @@ interface TypedSocket<T extends Record<string | symbol, any>, U extends Record<s
    emit<K extends keyof U>(event: K, args: U[K]): boolean;
 }
 
-const games: GameModel[] = [];
+const games = new ModelStore<GameModel>();
 
 function updateAllAssociatedWithGame(game: GameModel): void {
    io.in(game.hostSocketID).emit('gameUpdate', game.renderGameState());
    game.getPlayers().forEach((player) => {
       io.in(player.socketID).emit('gameUpdate', game.renderGameState(player));
    });
-}
 
-function findGameAssociatedToSocket(socketID: string): GameModel | undefined {
-   return games.find((game) => {
-      return game.hostSocketID === socketID
-         || !!game.findPlayerWithSocketID(socketID);
-   });
+   if (game.status === GameStatus.Ended) {
+      games.removeByID(game.id);
+   }
 }
 
 function findGameAndPlayerAssociatedToSocket(socketID: string): [ GameModel | undefined, PlayerModel | undefined ] {
-   for (let game of games) {
+   for (let game of games.all()) {
       const player = game.findPlayerWithSocketID(socketID);
 
       if (player) {
@@ -68,7 +66,7 @@ io.on('connection', (socket: TypedSocket<ClientEvents, ServerEvents>) => {
       const questions = await getQuestionList(1),
             game = new GameModel(socket.id, questions);
 
-      games.push(game);
+      games.add(game);
       socket.join(game.id);
       updateAllAssociatedWithGame(game);
    });
@@ -78,7 +76,7 @@ io.on('connection', (socket: TypedSocket<ClientEvents, ServerEvents>) => {
          return;
       }
 
-      const game = games.find((g) => { return g.status === GameStatus.Lobby && g.code === data.code; });
+      const game = games.all().find((g) => { return g.status === GameStatus.Lobby && g.code === data.code; });
 
       if (!game) {
          return;
@@ -127,15 +125,17 @@ io.on('connection', (socket: TypedSocket<ClientEvents, ServerEvents>) => {
    });
 
    socket.on('disconnecting', () => {
-      const game = findGameAssociatedToSocket(socket.id);
-
-      if (game) {
+      games.all().forEach((game) => {
          if (game.hostSocketID === socket.id) {
             io.in(game.id).emit('gameEnd', {});
+            games.removeByID(game.id);
          } else {
-            game.removePlayerWithSocketID(socket.id);
-            updateAllAssociatedWithGame(game);
+            const success = game.removePlayerWithSocketID(socket.id);
+
+            if (success) {
+               updateAllAssociatedWithGame(game);
+            }
          }
-      }
+      });
    });
 });

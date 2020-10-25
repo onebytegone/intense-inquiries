@@ -44,12 +44,15 @@ export class GameModel {
       return this._players.findByProp('socketID', socketID);
    }
 
-   public removePlayerWithSocketID(socketID: string): void {
+   public removePlayerWithSocketID(socketID: string): boolean {
       const player = this.findPlayerWithSocketID(socketID);
 
       if (player) {
          this._players.removeByID(player.id);
+         return true;
       }
+
+      return false;
    }
 
    public async step(): Promise<void> {
