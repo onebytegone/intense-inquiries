@@ -8,7 +8,7 @@ import { ModelStore } from './models/ModelStore';
 import { PlayerModel } from './models/PlayerModel';
 
 const app = express(),
-      port = process.env.PORT || 3000,
+      port = process.env.PORT || 3000, // eslint-disable-line no-process-env
       server = new http.Server(app),
       io = socketio(server) as TypedServer<ServerEvents>;
 
