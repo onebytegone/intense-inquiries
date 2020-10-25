@@ -8,7 +8,7 @@ interface TypedSocketClient<T extends Record<string | symbol, any>, U extends Re
    emit<K extends keyof U>(event: K, args: U[K]): TypedSocketClient<T, U>;
 }
 
-const socket = io('http://localhost:3000') as TypedSocketClient<ServerEvents, ClientEvents>;
+const socket = io(process.env.VUE_APP_SERVER_URL) as TypedSocketClient<ServerEvents, ClientEvents>;
 
 const game = ref<GameState | null>(null);
 
