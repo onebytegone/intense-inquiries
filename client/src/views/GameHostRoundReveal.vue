@@ -21,7 +21,7 @@ library.add(faHeart);
 
 export default defineComponent({
 
-   name: 'GameRoundReveal',
+   name: 'GameHostRoundReveal',
 
    setup: () => {
       return {

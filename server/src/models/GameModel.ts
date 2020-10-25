@@ -78,13 +78,12 @@ export class GameModel {
             }
          });
          this._readyPlayers.clear();
-      // eslint-disable-next-line max-len
-      } else if (this.status === GameStatus.Reveal && this._readyPlayers.size >= this._players.size && this._remainingQuestions.length > 0) {
+      } else if (this.status === GameStatus.Reveal && this._readyPlayers.size >= this._players.size) {
          this._status = GameStatus.Question;
          this._activeQuestion = this._remainingQuestions.pop();
          this._answers.clear();
          this._readyPlayers.clear();
-      } else if (this.status === GameStatus.Reveal) {
+      } else if (this.status === GameStatus.Reveal && this._remainingQuestions.length === 0) {
          this._status = GameStatus.Ended;
       }
    }

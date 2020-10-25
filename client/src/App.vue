@@ -12,9 +12,9 @@ import GameHostQuestion from './views/GameHostQuestion.vue';
 import GamePlayerQuestion from './views/GamePlayerQuestion.vue';
 import GameHostVoting from './views/GameHostVoting.vue';
 import GamePlayerVoting from './views/GamePlayerVoting.vue';
-import GameRoundReveal from './views/GameRoundReveal.vue';
+import GameHostRoundReveal from './views/GameHostRoundReveal.vue';
+import GamePlayerRoundReveal from './views/GamePlayerRoundReveal.vue';
 import GameFinalScore from './views/GameFinalScore.vue';
-import LookAtHost from './views/LookAtHost.vue';
 import gameService from './lib/game-service';
 import { GameStatus } from '../../lib/shared-types';
 
@@ -22,7 +22,7 @@ const gameStatusHostComponentMapping: Record<GameStatus, string> = {
    [GameStatus.Lobby]: 'GameLobby',
    [GameStatus.Question]: 'GameHostQuestion',
    [GameStatus.Vote]: 'GameHostVoting',
-   [GameStatus.Reveal]: 'GameRoundReveal',
+   [GameStatus.Reveal]: 'GameHostRoundReveal',
    [GameStatus.Ended]: 'GameFinalScore',
 };
 
@@ -30,7 +30,7 @@ const gameStatusPlayerComponentMapping: Record<GameStatus, string> = {
    [GameStatus.Lobby]: 'GameLobby',
    [GameStatus.Question]: 'GamePlayerQuestion',
    [GameStatus.Vote]: 'GamePlayerVoting',
-   [GameStatus.Reveal]: 'LookAtHost',
+   [GameStatus.Reveal]: 'GamePlayerRoundReveal',
    [GameStatus.Ended]: 'Welcome',
 };
 
@@ -45,9 +45,9 @@ export default defineComponent({
       GamePlayerQuestion,
       GameHostVoting,
       GamePlayerVoting,
-      GameRoundReveal,
+      GameHostRoundReveal,
+      GamePlayerRoundReveal,
       GameFinalScore,
-      LookAtHost,
    },
 
    setup: () => {
