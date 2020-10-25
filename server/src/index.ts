@@ -63,7 +63,7 @@ function findGameAndPlayerAssociatedToSocket(socketID: string): [ GameModel | un
 
 io.on('connection', (socket: TypedSocket<ClientEvents, ServerEvents>) => {
    socket.on('hostGame', async () => {
-      const questions = await getQuestionList(1),
+      const questions = await getQuestionList(8),
             game = new GameModel(socket.id, questions);
 
       games.add(game);
