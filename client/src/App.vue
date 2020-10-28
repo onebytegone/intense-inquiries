@@ -88,6 +88,7 @@ html, body {
 }
 .content {
    margin: 0 1em;
+   flex-grow: 1;
 }
 .color-green {
    color: #4caf50;
@@ -128,16 +129,5 @@ h3 {
 }
 li {
    margin: 0.25em 0;
-}
-.submitted {
-   display: flex;
-   justify-content: center;
-   list-style-type: none;
-   margin: 0;
-   padding: 0;
-   li {
-      margin: 0.5em;
-      padding: 0;
-   }
 }
 </style>
