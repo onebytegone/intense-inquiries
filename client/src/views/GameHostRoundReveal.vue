@@ -1,18 +1,22 @@
 <template>
    <div>
-      <h1>{{ game.question }}</h1>
-      <ul>
-         <li v-for="answer in answers" :key="answer.id">
-            {{ answer.text }} &mdash; {{ answer.author.name }}
-            <font-awesome-icon class="like" icon="heart" v-for="player in answer.favoriteOf" :key="player.id" />
-         </li>
-      </ul>
+      <ProgressBar :progress="game.progress"></ProgressBar>
+      <div class="content">
+         <h1>{{ game.question }}</h1>
+         <ul>
+            <li v-for="answer in answers" :key="answer.id">
+               {{ answer.text }} &mdash; {{ answer.author.name }}
+               <font-awesome-icon class="like" icon="heart" v-for="player in answer.favoriteOf" :key="player.id" />
+            </li>
+         </ul>
+      </div>
    </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import gameService from '../lib/game-service';
+import ProgressBar from '../components/ProgressBar.vue';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart } from '@fortawesome/free-solid-svg-icons';
@@ -22,6 +26,10 @@ library.add(faHeart);
 export default defineComponent({
 
    name: 'GameHostRoundReveal',
+
+   components: {
+      ProgressBar,
+   },
 
    setup: () => {
       return {

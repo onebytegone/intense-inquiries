@@ -13,6 +13,7 @@ export class GameModel {
 
    private _status: GameStatus;
    private _players = new ModelStore<PlayerModel>();
+   private _initialQuestionCount: number;
    private _remainingQuestions: string[];
    private _activeQuestion?: string;
    private _answers = new ModelStore<AnswerModel>('authorID');
@@ -24,6 +25,7 @@ export class GameModel {
       this.code = ('0000' + Math.floor(Math.random() * 10000).toString()).slice(-4);
       this._status = GameStatus.Lobby;
       this._remainingQuestions = questions;
+      this._initialQuestionCount = questions.length;
    }
 
    public get status(): GameStatus {
@@ -112,6 +114,7 @@ export class GameModel {
          players: this._players.all().map((p) => {
             return p.renderPlayerData();
          }),
+         progress: Math.round((this._initialQuestionCount - this._remainingQuestions.length) / this._initialQuestionCount * 100) / 100,
       };
 
       const playersReady = [ ...this._readyPlayers ]

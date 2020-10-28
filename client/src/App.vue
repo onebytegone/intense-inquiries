@@ -73,6 +73,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+html, body {
+   padding: 0;
+   margin: 0;
+}
 #app {
    font-family: Avenir, Helvetica, Arial, sans-serif;
    -webkit-font-smoothing: antialiased;
@@ -81,6 +85,8 @@ export default defineComponent({
    justify-content: center;
    color: #263238;
    font-size: 2em;
+}
+.content {
    margin: 0 1em;
 }
 .color-green {

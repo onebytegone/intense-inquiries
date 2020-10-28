@@ -21,6 +21,7 @@ interface BaseGameState {
    code: string;
    playerID?: string;
    players: Player[];
+   progress: number;
 }
 
 export interface GameStateLobby extends BaseGameState {
