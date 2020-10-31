@@ -35,7 +35,7 @@ const gameStatusPlayerComponentMapping: Record<GameStatus, string> = {
    [GameStatus.Question]: 'GamePlayerQuestion',
    [GameStatus.Vote]: 'GamePlayerVoting',
    [GameStatus.Reveal]: 'GamePlayerRoundReveal',
-   [GameStatus.Ended]: 'Welcome',
+   [GameStatus.Ended]: 'GameFinalScore',
 };
 
 export default defineComponent({
