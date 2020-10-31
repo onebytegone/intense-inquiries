@@ -40,6 +40,7 @@
     "eslint-plugin-vue": "7.1.0",
     "node-sass": "4.14.1",
     "sass-loader": "8.0.2",
+    "strict-event-emitter-types": "2.0.0",
     "typescript": "3.9.7"
   }
 }

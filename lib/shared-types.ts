@@ -69,17 +69,23 @@ export interface GameStateEnded extends BaseGameState {
 
 export type GameState = GameStateLobby | GameStateQuestion | GameStateVote | GameStateReveal | GameStateEnded;
 
+interface EventError {
+   message: string;
+}
+
 export interface ClientEvents {
-   hostGame: {};
-   joinGame: { code: string, name: string };
-   submitAnswer: { answer: string };
-   submitVote: { favorite: string };
-   submitReady: {};
-   disconnecting: {};
+   hostGame: void;
+   joinGame: (data: { code: string, name: string }, cb: (err?: EventError, data?: { token: string }) => void) => void;
+   rejoinGame: (data: { token: string }, cb: (err?: EventError) => void) => void;
+   submitAnswer: (data: { answer: string }) => void;
+   submitVote: (data: { favorite: string }) => void;
+   submitReady: void;
+   disconnecting: void;
 }
 
 export interface ServerEvents {
-   gameUpdate: GameState;
-   gameEnd: {};
-   connect: {};
+   gameUpdate: (state: GameState) => void;
+   gameEnd: void;
+   connect: void;
+   disconnect: void;
 }

@@ -17,7 +17,7 @@ export class GameModel {
    private _remainingQuestions: string[];
    private _activeQuestion?: string;
    private _answers = new ModelStore<AnswerModel>('authorID');
-   private _readyPlayers = new Set<string>();
+   private _playersDoneWithCurrentTask = new Set<string>();
 
    public constructor(hostSocketID: string, questions: string[]) {
       this.id = uuid();
@@ -47,30 +47,52 @@ export class GameModel {
       return true;
    }
 
+   public findPlayerWithID(playerID: string): PlayerModel | undefined {
+      return this._players.findByID(playerID);
+   }
+
    public findPlayerWithSocketID(socketID: string): PlayerModel | undefined {
       return this._players.findByProp('socketID', socketID);
    }
 
-   public removePlayerWithSocketID(socketID: string): boolean {
+   public playerWithSocketIDDisconnected(socketID: string): boolean {
       const player = this.findPlayerWithSocketID(socketID);
 
-      if (player) {
-         this._players.removeByID(player.id);
-         return true;
+      if (!player) {
+         return false;
       }
 
-      return false;
+      if (this.status === GameStatus.Lobby) {
+         this._players.removeByID(player.id);
+      } else {
+         player.socketID = undefined;
+      }
+
+      return true;
+   }
+
+   public areAllActivePlayersDoneWithCurrentTask(): boolean {
+      const playerNotDone = this._players.all()
+         .filter((player) => {
+            return !!player.socketID;
+         })
+         .find((player) => {
+            return !this._playersDoneWithCurrentTask.has(player.id);
+         });
+
+      return playerNotDone === undefined;
    }
 
    public async step(): Promise<void> {
-      if (this.status === GameStatus.Lobby && this._readyPlayers.size >= this._players.size && this._players.size >= 3) {
+      if (this.status === GameStatus.Lobby && this.areAllActivePlayersDoneWithCurrentTask() && this._players.size >= 3) {
          this._status = GameStatus.Question;
          this._activeQuestion = this._remainingQuestions.pop();
          this._answers.clear();
-         this._readyPlayers.clear();
-      } else if (this.status === GameStatus.Question && this._answers.size >= this._players.size) {
+         this._playersDoneWithCurrentTask.clear();
+      } else if (this.status === GameStatus.Question && this.areAllActivePlayersDoneWithCurrentTask()) {
          this._status = GameStatus.Vote;
-      } else if (this.status === GameStatus.Vote && this._readyPlayers.size >= this._players.size) {
+         this._playersDoneWithCurrentTask.clear();
+      } else if (this.status === GameStatus.Vote && this.areAllActivePlayersDoneWithCurrentTask()) {
          this._status = GameStatus.Reveal;
          this._answers.all().forEach((answer) => {
             const author = this._players.findByID(answer.authorID);
@@ -79,27 +101,28 @@ export class GameModel {
                author.awardPointsForFavorites(answer.favorited);
             }
          });
-         this._readyPlayers.clear();
-      } else if (this.status === GameStatus.Reveal && this._readyPlayers.size >= this._players.size) {
+         this._playersDoneWithCurrentTask.clear();
+      } else if (this.status === GameStatus.Reveal && this.areAllActivePlayersDoneWithCurrentTask()) {
          this._status = GameStatus.Question;
          this._activeQuestion = this._remainingQuestions.pop();
          this._answers.clear();
-         this._readyPlayers.clear();
+         this._playersDoneWithCurrentTask.clear();
       } else if (this.status === GameStatus.Reveal && this._remainingQuestions.length === 0) {
          this._status = GameStatus.Ended;
       }
    }
 
    public submitReadyForPlayer(player: PlayerModel): void {
-      this._readyPlayers.add(player.id);
+      this._playersDoneWithCurrentTask.add(player.id);
    }
 
    public submitAnswerForPlayer(player: PlayerModel, answer: string): void {
+      this._playersDoneWithCurrentTask.add(player.id);
       this._answers.add(new AnswerModel(player.id, answer));
    }
 
    public submitVoteForPlayer(player: PlayerModel, favoriteAnswerID: string): void {
-      this._readyPlayers.add(player.id);
+      this._playersDoneWithCurrentTask.add(player.id);
       const favoriteAnswer = this._answers.findByProp('id', favoriteAnswerID);
 
       if (favoriteAnswer) {
@@ -117,7 +140,7 @@ export class GameModel {
          progress: Math.round((this._initialQuestionCount - this._remainingQuestions.length) / this._initialQuestionCount * 100) / 100,
       };
 
-      const playersReady = [ ...this._readyPlayers ]
+      const playersReady = [ ...this._playersDoneWithCurrentTask ]
          .map((playerID) => {
             const p = this._players.findByID(playerID);
 
