@@ -14,7 +14,7 @@ export class AnswerModel {
    public constructor(authorID: string, text: string) {
       this.id = uuid();
       this.authorID = authorID;
-      this.text = text.toUpperCase().replace(/[^A-Z0-9- ]+/gu, '');
+      this.text = text.toUpperCase();
    }
 
    public addFavoriteFrom(playerID: string): void {

@@ -1,5 +1,5 @@
 <template>
-   <div>
+   <div class="content">
       <h1>Final Score:</h1>
       <ol>
          <li v-for="player in game.players.sort((a, b) => b.score - a.score)" :key="player.id">

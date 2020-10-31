@@ -1,5 +1,5 @@
 <template>
-   <div>
+   <div class="content">
       <h1 v-if="isWaiting">Waiting...</h1>
       <div v-else>
          <h1>Look at the host screen!</h1>
