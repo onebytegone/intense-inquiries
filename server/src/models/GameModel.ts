@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { GameState, GameStatus } from '../../../lib/shared-types';
+import { GameState, GameStatus, PlayerWithTask } from '../../../lib/shared-types';
 import filterUndefined from '../lib/filter-undefined';
 import { AnswerModel } from './AnswerModel';
 import { ModelStore } from './ModelStore';
@@ -133,23 +133,15 @@ export class GameModel {
    public renderGameState(player?: PlayerModel): GameState {
       const baseState = {
          code: this.code,
-         playerID: player ? player.id : undefined,
-         players: this._players.all().map((p) => {
-            return p.renderPlayerData();
-         }),
          progress: Math.round((this._initialQuestionCount - this._remainingQuestions.length) / this._initialQuestionCount * 100) / 100,
+         player: player && this._renderPlayer(player),
       };
 
-      const playersReady = [ ...this._playersDoneWithCurrentTask ]
-         .map((playerID) => {
-            const p = this._players.findByID(playerID);
-
-            return p ? p.renderPlayerData() : undefined;
-         })
-         .filter(filterUndefined);
-
       if (this._status === GameStatus.Lobby) {
-         return Object.assign({ status: this._status, playersReady }, baseState);
+         return Object.assign({
+            status: this._status,
+            players: this._players.all().map(this._renderPlayer.bind(this)),
+         }, baseState);
       } else if (this._status === GameStatus.Question) {
          if (!this._activeQuestion) {
             throw new Error('No active question is defined');
@@ -157,11 +149,7 @@ export class GameModel {
          return Object.assign({
             status: this._status,
             question: this._activeQuestion,
-            playersDone: this._answers.all()
-               .map((answer) => {
-                  return this._players.findByID(answer.authorID);
-               })
-               .filter(filterUndefined),
+            players: this._players.all().map(this._renderPlayer.bind(this)),
          }, baseState);
       } else if (this._status === GameStatus.Vote) {
          if (!this._activeQuestion) {
@@ -176,7 +164,7 @@ export class GameModel {
             answers: answers.map((answer) => {
                return answer.renderAnonymousAnswer();
             }),
-            playersDone: playersReady,
+            players: this._players.all().map(this._renderPlayer.bind(this)),
          }, baseState);
       } else if (this._status === GameStatus.Reveal) {
          if (!this._activeQuestion) {
@@ -191,7 +179,7 @@ export class GameModel {
                   return answer.renderPlayerAnswerResult(this._players);
                })
                .filter(filterUndefined),
-            playersReady,
+            players: this._players.all().map(this._renderPlayer.bind(this)),
          }, baseState);
       } else if (this._status === GameStatus.Ended) {
          return Object.assign({ status: this._status }, baseState, {
@@ -202,6 +190,12 @@ export class GameModel {
       }
 
       throw new Error(`Unhandled status ${this._status}`);
+   }
+
+   private _renderPlayer(player: PlayerModel): PlayerWithTask {
+      return Object.assign(player.renderPlayerData(), {
+         hasSubmitted: this._playersDoneWithCurrentTask.has(player.id),
+      });
    }
 
 }

@@ -31,7 +31,7 @@ socket.on('gameEnd', () => {
 const exposed = {
 
    isHost: computed(() => {
-      return game.value ? game.value.playerID === undefined : false;
+      return game.value ? game.value.player === undefined : false;
    }),
 
    game,

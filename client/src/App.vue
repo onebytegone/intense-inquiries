@@ -97,8 +97,15 @@ html, body {
    color: #263238;
    font-size: 2em;
 }
+.view {
+   display: flex;
+   flex-direction: column;
+   min-height: 100vh;
+   width: 100vw;
+}
 .content {
-   margin: 0 1em;
+   margin: 0 auto;
+   padding: 0 1em;
    flex-grow: 1;
 }
 .color-green {

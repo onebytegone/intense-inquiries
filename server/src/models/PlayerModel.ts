@@ -31,15 +31,14 @@ export class PlayerModel {
       return {
          id: this.id,
          name: this.name,
+         isActive: !!this.socketID,
       };
    }
 
    public renderLeaderboardData(): LeaderboardPlayer {
-      return {
-         id: this.id,
-         name: this.name,
+      return Object.assign(this.renderPlayerData(), {
          score: this._score,
-      };
+      });
    }
 
 }

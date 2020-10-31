@@ -1,6 +1,6 @@
 <template>
    <div class="content">
-      <h1 v-if="isWaiting">Waiting...</h1>
+      <h1 v-if="game.player.hasSubmitted">Waiting...</h1>
       <div v-else>
          <h1>{{ game.question }}</h1>
          <form>
@@ -12,8 +12,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
-import { GameStatus } from '../../../lib/shared-types';
+import { defineComponent, ref } from 'vue';
 import gameService from '../lib/game-service';
 
 export default defineComponent({
@@ -30,21 +29,6 @@ export default defineComponent({
          submitAnswer: () => {
             gameService.submitAnswer(answer.value);
          },
-
-         isWaiting: computed(() => {
-            const game = gameService.game.value;
-
-            if (!game) {
-               return;
-            }
-
-            const playerID = game.playerID,
-                  playersDone = game.status === GameStatus.Question ? game.playersDone : [];
-
-            return !!playersDone.find((player) => {
-               return player.id === playerID;
-            });
-         }),
       };
    },
 
