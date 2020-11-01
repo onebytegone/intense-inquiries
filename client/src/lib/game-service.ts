@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue';
 import io from 'socket.io-client';
 import StrictEventEmitter from 'strict-event-emitter-types';
-import { ClientEvents, GameState, ServerEvents } from '../../../lib/shared-types';
+import { ClientEvents, GameState, ServerEvents, PlayerVote } from '../../../lib/shared-types';
 
 // TODO: shouldn't need the "as StrictEventEmitter<...>" hammer. However without it, TS
 // complains with: Types of parameters 'event' and 'event' are incompatible. Type 'typeof
@@ -69,8 +69,8 @@ const exposed = {
       socket.emit('submitAnswer', { answer });
    },
 
-   submitVote: (favorite: string) => {
-      socket.emit('submitVote', { favorite });
+   submitVote: (vote: PlayerVote) => {
+      socket.emit('submitVote', { vote });
    },
 
    submitReady: () => {

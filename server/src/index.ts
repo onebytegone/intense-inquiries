@@ -165,7 +165,7 @@ io.on('connection', (socket: StrictEventEmitter<SocketIO.Socket, ClientEvents, S
          return;
       }
 
-      game.submitVoteForPlayer(player, data.favorite);
+      game.submitVoteForPlayer(player, data.vote);
       await game.step();
       updateAllAssociatedWithGame(game);
    });

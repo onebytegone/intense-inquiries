@@ -27,6 +27,10 @@ export class PlayerModel {
       this._score += favorited;
    }
 
+   public awardPointsForCorrectAttributions(correctAttributions: number): void {
+      this._score += correctAttributions * 2;
+   }
+
    public renderPlayerData(): Player {
       return {
          id: this.id,
