@@ -47,6 +47,7 @@ export interface GameStateVote extends BaseGameState {
    question: string;
    answers: AnonymousAnswer[];
    players: PlayerWithTask[];
+   authors: Player[];
 }
 
 export interface PlayerAnswerResult {
@@ -71,6 +72,14 @@ export interface GameStateEnded extends BaseGameState {
 
 export type GameState = GameStateLobby | GameStateQuestion | GameStateVote | GameStateReveal | GameStateEnded;
 
+export interface PlayerVote {
+   favoriteAnswerID: string;
+   attribution: {
+      playerID: string;
+      answerID: string;
+   }[];
+}
+
 interface EventError {
    message: string;
 }
@@ -80,7 +89,7 @@ export interface ClientEvents {
    joinGame: (data: { code: string, name: string }, cb: (err?: EventError, data?: { token: string }) => void) => void;
    rejoinGame: (data: { token: string }, cb: (err?: EventError) => void) => void;
    submitAnswer: (data: { answer: string }) => void;
-   submitVote: (data: { favorite: string }) => void;
+   submitVote: (data: { vote: PlayerVote; }) => void;
    submitReady: void;
    disconnecting: void;
 }

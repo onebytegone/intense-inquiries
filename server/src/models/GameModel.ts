@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { GameState, GameStatus, PlayerWithTask } from '../../../lib/shared-types';
+import { GameState, GameStatus, PlayerWithTask, PlayerVote } from '../../../lib/shared-types';
 import filterUndefined from '../lib/filter-undefined';
 import { AnswerModel } from './AnswerModel';
 import { ModelStore } from './ModelStore';
@@ -100,6 +100,14 @@ export class GameModel {
             if (author) {
                author.awardPointsForFavorites(answer.favorited);
             }
+
+            answer.correctAttributors.forEach((attributorID) => {
+               const attributor = this._players.findByID(attributorID);
+
+               if (attributor) {
+                  attributor.awardPointsForCorrectAttributions(1);
+               }
+            });
          });
          this._playersDoneWithCurrentTask.clear();
       } else if (this.status === GameStatus.Reveal && this.areAllActivePlayersDoneWithCurrentTask()) {
@@ -123,13 +131,22 @@ export class GameModel {
       this._answers.add(new AnswerModel(player.id, answer));
    }
 
-   public submitVoteForPlayer(player: PlayerModel, favoriteAnswerID: string): void {
+   public submitVoteForPlayer(player: PlayerModel, vote: PlayerVote): void {
       this._playersDoneWithCurrentTask.add(player.id);
-      const favoriteAnswer = this._answers.findByProp('id', favoriteAnswerID);
+      const favoriteAnswer = this._answers.findByProp('id', vote.favoriteAnswerID);
 
       if (favoriteAnswer) {
          favoriteAnswer.addFavoriteFrom(player.id);
       }
+
+      // Limit to one attribution per vote
+      vote.attribution.slice(0, 1).forEach((attribution) => {
+         const answer = this._answers.findByProp('id', attribution.answerID);
+
+         if (answer) {
+            answer.addAttributionGuess(player.id, attribution.playerID);
+         }
+      });
    }
 
    public renderGameState(player?: PlayerModel): GameState {
@@ -166,6 +183,17 @@ export class GameModel {
             answers: answers.map((answer) => {
                return answer.renderAnonymousAnswer();
             }),
+            authors: this._answers.all()
+               .map((answer) => {
+                  if (player && answer.authorID === player.id) {
+                     return undefined;
+                  }
+
+                  const author = this._players.findByID(answer.authorID);
+
+                  return author && author.renderPlayerData();
+               })
+               .filter(filterUndefined),
             players: this._players.all().map(this._renderPlayer.bind(this)),
          }, baseState);
       } else if (this._status === GameStatus.Reveal) {

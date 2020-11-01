@@ -4,12 +4,18 @@ import filterUndefined from '../lib/filter-undefined';
 import { ModelStore } from './ModelStore';
 import { PlayerModel } from './PlayerModel';
 
+export interface AttributionGuess {
+   guesserID: string;
+   authorID: string;
+}
+
 export class AnswerModel {
 
    public readonly id: string;
    public readonly authorID: string;
    public readonly text: string;
    protected _favoritedBy = new Set<string>();
+   protected _attributionGuesses: AttributionGuess[] = [];
 
    public constructor(authorID: string, text: string) {
       this.id = uuid();
@@ -21,8 +27,22 @@ export class AnswerModel {
       this._favoritedBy.add(playerID);
    }
 
+   public addAttributionGuess(guesserID: string, authorID: string): void {
+      this._attributionGuesses.push({ guesserID, authorID });
+   }
+
    public get favorited(): number {
       return this._favoritedBy.size;
+   }
+
+   public get correctAttributors(): string[] {
+      return this._attributionGuesses
+         .filter((guess) => {
+            return guess.authorID === this.authorID;
+         })
+         .map((guess) => {
+            return guess.guesserID;
+         });
    }
 
    public renderAnonymousAnswer(): AnonymousAnswer {
