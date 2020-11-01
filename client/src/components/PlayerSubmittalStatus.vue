@@ -1,6 +1,6 @@
 <template>
    <ul>
-      <li v-for="player in players" :key="player.id" :class="{ 'submitted': player.submitted === true }" >
+      <li v-for="player in players" :key="player.id" :class="{ 'submitted': player.hasSubmitted, 'inactive': !player.isActive }" >
          {{ player.name }}
       </li>
    </ul>
@@ -12,7 +12,7 @@ import { defineComponent, PropType } from 'vue';
 export interface PlayerSubmittalStatus {
    id: string;
    name: string;
-   submitted: boolean;
+   hasSubmitted: boolean;
 }
 
 export default defineComponent({
@@ -45,6 +45,9 @@ li {
    &.submitted {
       color: #333333;
       font-weight: bold;
+   }
+   &.inactive {
+      text-decoration: line-through wavy;
    }
 }
 </style>

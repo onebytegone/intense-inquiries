@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { GameState, GameStatus } from '../../../lib/shared-types';
+import { GameState, GameStatus, PlayerWithTask } from '../../../lib/shared-types';
 import filterUndefined from '../lib/filter-undefined';
 import { AnswerModel } from './AnswerModel';
 import { ModelStore } from './ModelStore';
@@ -17,7 +17,7 @@ export class GameModel {
    private _remainingQuestions: string[];
    private _activeQuestion?: string;
    private _answers = new ModelStore<AnswerModel>('authorID');
-   private _readyPlayers = new Set<string>();
+   private _playersDoneWithCurrentTask = new Set<string>();
 
    public constructor(hostSocketID: string, questions: string[]) {
       this.id = uuid();
@@ -47,30 +47,52 @@ export class GameModel {
       return true;
    }
 
+   public findPlayerWithID(playerID: string): PlayerModel | undefined {
+      return this._players.findByID(playerID);
+   }
+
    public findPlayerWithSocketID(socketID: string): PlayerModel | undefined {
       return this._players.findByProp('socketID', socketID);
    }
 
-   public removePlayerWithSocketID(socketID: string): boolean {
+   public playerWithSocketIDDisconnected(socketID: string): boolean {
       const player = this.findPlayerWithSocketID(socketID);
 
-      if (player) {
-         this._players.removeByID(player.id);
-         return true;
+      if (!player) {
+         return false;
       }
 
-      return false;
+      if (this.status === GameStatus.Lobby) {
+         this._players.removeByID(player.id);
+      } else {
+         player.socketID = undefined;
+      }
+
+      return true;
+   }
+
+   public areAllActivePlayersDoneWithCurrentTask(): boolean {
+      const playerNotDone = this._players.all()
+         .filter((player) => {
+            return !!player.socketID;
+         })
+         .find((player) => {
+            return !this._playersDoneWithCurrentTask.has(player.id);
+         });
+
+      return playerNotDone === undefined;
    }
 
    public async step(): Promise<void> {
-      if (this.status === GameStatus.Lobby && this._readyPlayers.size >= this._players.size && this._players.size >= 3) {
+      if (this.status === GameStatus.Lobby && this.areAllActivePlayersDoneWithCurrentTask() && this._players.size >= 3) {
          this._status = GameStatus.Question;
          this._activeQuestion = this._remainingQuestions.pop();
          this._answers.clear();
-         this._readyPlayers.clear();
-      } else if (this.status === GameStatus.Question && this._answers.size >= this._players.size) {
+         this._playersDoneWithCurrentTask.clear();
+      } else if (this.status === GameStatus.Question && this.areAllActivePlayersDoneWithCurrentTask()) {
          this._status = GameStatus.Vote;
-      } else if (this.status === GameStatus.Vote && this._readyPlayers.size >= this._players.size) {
+         this._playersDoneWithCurrentTask.clear();
+      } else if (this.status === GameStatus.Vote && this.areAllActivePlayersDoneWithCurrentTask()) {
          this._status = GameStatus.Reveal;
          this._answers.all().forEach((answer) => {
             const author = this._players.findByID(answer.authorID);
@@ -79,27 +101,28 @@ export class GameModel {
                author.awardPointsForFavorites(answer.favorited);
             }
          });
-         this._readyPlayers.clear();
-      } else if (this.status === GameStatus.Reveal && this._readyPlayers.size >= this._players.size) {
+         this._playersDoneWithCurrentTask.clear();
+      } else if (this.status === GameStatus.Reveal && this.areAllActivePlayersDoneWithCurrentTask()) {
          this._status = GameStatus.Question;
          this._activeQuestion = this._remainingQuestions.pop();
          this._answers.clear();
-         this._readyPlayers.clear();
+         this._playersDoneWithCurrentTask.clear();
       } else if (this.status === GameStatus.Reveal && this._remainingQuestions.length === 0) {
          this._status = GameStatus.Ended;
       }
    }
 
    public submitReadyForPlayer(player: PlayerModel): void {
-      this._readyPlayers.add(player.id);
+      this._playersDoneWithCurrentTask.add(player.id);
    }
 
    public submitAnswerForPlayer(player: PlayerModel, answer: string): void {
+      this._playersDoneWithCurrentTask.add(player.id);
       this._answers.add(new AnswerModel(player.id, answer));
    }
 
    public submitVoteForPlayer(player: PlayerModel, favoriteAnswerID: string): void {
-      this._readyPlayers.add(player.id);
+      this._playersDoneWithCurrentTask.add(player.id);
       const favoriteAnswer = this._answers.findByProp('id', favoriteAnswerID);
 
       if (favoriteAnswer) {
@@ -110,23 +133,15 @@ export class GameModel {
    public renderGameState(player?: PlayerModel): GameState {
       const baseState = {
          code: this.code,
-         playerID: player ? player.id : undefined,
-         players: this._players.all().map((p) => {
-            return p.renderPlayerData();
-         }),
          progress: Math.round((this._initialQuestionCount - this._remainingQuestions.length) / this._initialQuestionCount * 100) / 100,
+         player: player && this._renderPlayer(player),
       };
 
-      const playersReady = [ ...this._readyPlayers ]
-         .map((playerID) => {
-            const p = this._players.findByID(playerID);
-
-            return p ? p.renderPlayerData() : undefined;
-         })
-         .filter(filterUndefined);
-
       if (this._status === GameStatus.Lobby) {
-         return Object.assign({ status: this._status, playersReady }, baseState);
+         return Object.assign({
+            status: this._status,
+            players: this._players.all().map(this._renderPlayer.bind(this)),
+         }, baseState);
       } else if (this._status === GameStatus.Question) {
          if (!this._activeQuestion) {
             throw new Error('No active question is defined');
@@ -134,11 +149,7 @@ export class GameModel {
          return Object.assign({
             status: this._status,
             question: this._activeQuestion,
-            playersDone: this._answers.all()
-               .map((answer) => {
-                  return this._players.findByID(answer.authorID);
-               })
-               .filter(filterUndefined),
+            players: this._players.all().map(this._renderPlayer.bind(this)),
          }, baseState);
       } else if (this._status === GameStatus.Vote) {
          if (!this._activeQuestion) {
@@ -153,7 +164,7 @@ export class GameModel {
             answers: answers.map((answer) => {
                return answer.renderAnonymousAnswer();
             }),
-            playersDone: playersReady,
+            players: this._players.all().map(this._renderPlayer.bind(this)),
          }, baseState);
       } else if (this._status === GameStatus.Reveal) {
          if (!this._activeQuestion) {
@@ -168,7 +179,7 @@ export class GameModel {
                   return answer.renderPlayerAnswerResult(this._players);
                })
                .filter(filterUndefined),
-            playersReady,
+            players: this._players.all().map(this._renderPlayer.bind(this)),
          }, baseState);
       } else if (this._status === GameStatus.Ended) {
          return Object.assign({ status: this._status }, baseState, {
@@ -179,6 +190,12 @@ export class GameModel {
       }
 
       throw new Error(`Unhandled status ${this._status}`);
+   }
+
+   private _renderPlayer(player: PlayerModel): PlayerWithTask {
+      return Object.assign(player.renderPlayerData(), {
+         hasSubmitted: this._playersDoneWithCurrentTask.has(player.id),
+      });
    }
 
 }

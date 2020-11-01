@@ -1,11 +1,14 @@
 export interface Player {
    id: string;
    name: string;
+   isActive: boolean;
 }
 
-export interface LeaderboardPlayer {
-   id: string;
-   name: string;
+export interface PlayerWithTask extends Player {
+   hasSubmitted: boolean;
+}
+
+export interface LeaderboardPlayer extends Player {
    score: number;
 }
 
@@ -19,20 +22,19 @@ export enum GameStatus {
 
 interface BaseGameState {
    code: string;
-   playerID?: string;
-   players: Player[];
+   player?: PlayerWithTask;
    progress: number;
 }
 
 export interface GameStateLobby extends BaseGameState {
    status: GameStatus.Lobby;
-   playersReady: Player[];
+   players: PlayerWithTask[];
 }
 
 export interface GameStateQuestion extends BaseGameState {
    status: GameStatus.Question;
    question: string;
-   playersDone: Player[];
+   players: PlayerWithTask[];
 }
 
 export interface AnonymousAnswer {
@@ -44,7 +46,7 @@ export interface GameStateVote extends BaseGameState {
    status: GameStatus.Vote;
    question: string;
    answers: AnonymousAnswer[];
-   playersDone: Player[];
+   players: PlayerWithTask[];
 }
 
 export interface PlayerAnswerResult {
@@ -59,7 +61,7 @@ export interface GameStateReveal extends BaseGameState {
    status: GameStatus.Reveal;
    question: string;
    answers: PlayerAnswerResult[];
-   playersReady: Player[];
+   players: PlayerWithTask[];
 }
 
 export interface GameStateEnded extends BaseGameState {
@@ -69,17 +71,23 @@ export interface GameStateEnded extends BaseGameState {
 
 export type GameState = GameStateLobby | GameStateQuestion | GameStateVote | GameStateReveal | GameStateEnded;
 
+interface EventError {
+   message: string;
+}
+
 export interface ClientEvents {
-   hostGame: {};
-   joinGame: { code: string, name: string };
-   submitAnswer: { answer: string };
-   submitVote: { favorite: string };
-   submitReady: {};
-   disconnecting: {};
+   hostGame: void;
+   joinGame: (data: { code: string, name: string }, cb: (err?: EventError, data?: { token: string }) => void) => void;
+   rejoinGame: (data: { token: string }, cb: (err?: EventError) => void) => void;
+   submitAnswer: (data: { answer: string }) => void;
+   submitVote: (data: { favorite: string }) => void;
+   submitReady: void;
+   disconnecting: void;
 }
 
 export interface ServerEvents {
-   gameUpdate: GameState;
-   gameEnd: {};
-   connect: {};
+   gameUpdate: (state: GameState) => void;
+   gameEnd: void;
+   connect: void;
+   disconnect: void;
 }

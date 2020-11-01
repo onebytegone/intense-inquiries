@@ -1,5 +1,5 @@
 <template>
-   <div>
+   <div class="view">
       <ProgressBar :progress="game.progress"></ProgressBar>
       <div class="content">
          <h1>{{ game.question }}</h1>
@@ -10,6 +10,7 @@
             </li>
          </ul>
       </div>
+      <PlayerSubmittalStatus :players="game.players"></PlayerSubmittalStatus>
    </div>
 </template>
 
@@ -17,6 +18,7 @@
 import { computed, defineComponent } from 'vue';
 import gameService from '../lib/game-service';
 import ProgressBar from '../components/ProgressBar.vue';
+import PlayerSubmittalStatus from '../components/PlayerSubmittalStatus.vue';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart } from '@fortawesome/free-solid-svg-icons';
@@ -28,6 +30,7 @@ export default defineComponent({
    name: 'GameHostRoundReveal',
 
    components: {
+      PlayerSubmittalStatus,
       ProgressBar,
    },
 

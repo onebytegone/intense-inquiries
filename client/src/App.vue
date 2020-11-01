@@ -1,11 +1,15 @@
 <template>
    <div>
-      <component v-bind:is="view"></component>
+      <div v-if="isLoading" class="loading">
+         <p>Loading...</p>
+         <div class="loading-spinner"></div>
+      </div>
+      <component v-else v-bind:is="view"></component>
    </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import Welcome from './views/Welcome.vue';
 import GameLobby from './views/GameLobby.vue';
 import GameHostQuestion from './views/GameHostQuestion.vue';
@@ -31,7 +35,7 @@ const gameStatusPlayerComponentMapping: Record<GameStatus, string> = {
    [GameStatus.Question]: 'GamePlayerQuestion',
    [GameStatus.Vote]: 'GamePlayerVoting',
    [GameStatus.Reveal]: 'GamePlayerRoundReveal',
-   [GameStatus.Ended]: 'Welcome',
+   [GameStatus.Ended]: 'GameFinalScore',
 };
 
 export default defineComponent({
@@ -51,7 +55,14 @@ export default defineComponent({
    },
 
    setup: () => {
+      const isLoading = ref(true);
+
+      gameService.attemptToRejoinGame().then(() => {
+         isLoading.value = false;
+      });
+
       return {
+         isLoading,
          view: computed(() => {
             const game = gameService.game.value,
                   isHost = gameService.isHost.value;
@@ -86,8 +97,15 @@ html, body {
    color: #263238;
    font-size: 2em;
 }
+.view {
+   display: flex;
+   flex-direction: column;
+   min-height: 100vh;
+   width: 100vw;
+}
 .content {
-   margin: 0 1em;
+   margin: 0 auto;
+   padding: 0 1em;
    flex-grow: 1;
 }
 .color-green {
@@ -129,5 +147,32 @@ h3 {
 }
 li {
    margin: 0.25em 0;
+}
+.loading {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   position: absolute;
+   top: 0;
+   bottom: 0;
+   left: 0;
+   right: 0;
+   font-weight: bold;
+   p {
+      margin: 0.5em;
+   }
+}
+.loading-spinner {
+   border: 16px solid #f3f3f3;
+   border-top: 16px solid #263238;
+   border-radius: 50%;
+   width: 64px;
+   height: 64px;
+   animation: spin 2s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

@@ -5,7 +5,7 @@ export class PlayerModel {
 
    public readonly id: string;
    public readonly name: string
-   public readonly socketID: string;
+   public socketID?: string;
    private _score: number = 0;
 
    public constructor(socketID: string, name: string) {
@@ -31,15 +31,14 @@ export class PlayerModel {
       return {
          id: this.id,
          name: this.name,
+         isActive: !!this.socketID,
       };
    }
 
    public renderLeaderboardData(): LeaderboardPlayer {
-      return {
-         id: this.id,
-         name: this.name,
+      return Object.assign(this.renderPlayerData(), {
          score: this._score,
-      };
+      });
    }
 
 }
