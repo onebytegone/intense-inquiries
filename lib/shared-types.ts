@@ -91,7 +91,8 @@ export interface ClientEvents {
    submitAnswer: (data: { answer: string }) => void;
    submitVote: (data: { vote: PlayerVote; }) => void;
    submitReady: void;
-   disconnecting: void;
+   disconnecting: (reason: string) => void;
+   disconnect: (reason: string) => void;
 }
 
 export interface ServerEvents {

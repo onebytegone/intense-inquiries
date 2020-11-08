@@ -184,20 +184,46 @@ io.on('connection', (socket: StrictEventEmitter<SocketIO.Socket, ClientEvents, S
       updateAllAssociatedWithGame(game);
    });
 
-   socket.on('disconnecting', () => {
+   socket.on('disconnecting', (reason) => {
       games.all().forEach((game) => {
          if (game.hostSocketID === socket.id) {
             io.in(game.id).emit('gameEnd');
             games.removeByID(game.id);
+
+            // eslint-disable-next-line no-console
+            console.info(
+               `Socket: ${socket.id}`
+               + `\t(Game: ${game ? game.id : 'n/a'} Player: Host)`
+               + `\tEvent: disconnecting\tReason: ${reason}`
+            );
          } else {
-            const success = game.playerWithSocketIDDisconnected(socket.id);
+            const success = game.playerWithSocketIDDisconnected(socket.id),
+                  player = game.findPlayerWithSocketID(socket.id);
 
             if (success) {
                game.step().then(() => {
                   updateAllAssociatedWithGame(game);
                });
             }
+
+            // eslint-disable-next-line no-console
+            console.info(
+               `Socket: ${socket.id}`
+               + `\t(Game: ${game ? game.id : 'n/a'} Player: ${player ? player.name : 'n/a'})`
+               + `\tEvent: disconnecting\tReason: ${reason}\tDid disconnect: ${success}`
+            );
          }
       });
+   });
+
+   socket.on('disconnect', (reason) => {
+      const [ game, player ] = findGameAndPlayerAssociatedToSocket(socket.id);
+
+      // eslint-disable-next-line no-console
+      console.info(
+         `Socket: ${socket.id}`
+         + `\t(Game: ${game ? game.id : 'n/a'} Player: ${player ? player.name : 'n/a'})`
+         + `\tEvent: disconnect\tReason: ${reason}`
+      );
    });
 });
