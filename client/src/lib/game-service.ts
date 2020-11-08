@@ -9,13 +9,31 @@ import { ClientEvents, GameState, ServerEvents, PlayerVote } from '../../../lib/
 // eslint-disable-next-line no-process-env
 const socket = io(process.env.VUE_APP_SERVER_URL) as StrictEventEmitter<SocketIOClient.Socket, ServerEvents, ClientEvents>;
 
-const game = ref<GameState | null>(null);
+const game = ref<GameState | null>(null),
+      isWaiting = ref(true);
 
 socket.on('connect', () => {
-   game.value = null;
+   const playerToken = localStorage.getItem('playerToken');
+
+   if (!playerToken) {
+      isWaiting.value = false;
+      return;
+   }
+
+   socket.emit('rejoinGame', { token: playerToken }, (err) => {
+      if (err) {
+         localStorage.removeItem('playerToken');
+      }
+      isWaiting.value = false;
+   });
 });
 
-socket.on('disconnect', () => {
+socket.on('disconnect', (reason) => {
+   if (reason === 'io server disconnect') {
+      socket.connect();
+   }
+
+   isWaiting.value = true;
    game.value = null;
 });
 
@@ -35,6 +53,7 @@ const exposed = {
    }),
 
    game,
+   isWaiting,
 
    hostGame: () => {
       socket.emit('hostGame');
@@ -45,23 +64,6 @@ const exposed = {
          if (data) {
             localStorage.setItem('playerToken', data.token);
          }
-      });
-   },
-
-   attemptToRejoinGame: () => {
-      const playerToken = localStorage.getItem('playerToken');
-
-      if (!playerToken) {
-         return Promise.resolve();
-      }
-
-      return new Promise((resolve) => {
-         socket.emit('rejoinGame', { token: playerToken }, (err) => {
-            if (err) {
-               localStorage.removeItem('playerToken');
-            }
-            resolve();
-         });
       });
    },
 
