@@ -60,6 +60,20 @@ function findGameAndPlayerAssociatedToSocket(socketID: string): [ GameModel | un
 }
 
 io.on('connection', (socket: StrictEventEmitter<SocketIO.Socket, ClientEvents, ServerEvents>) => {
+
+   socket.use(([ event, data ], next) => {
+      const [ game, player ] = findGameAndPlayerAssociatedToSocket(socket.id);
+
+      // eslint-disable-next-line no-console
+      console.info(
+         `Socket: ${socket.id}`
+         + `\t(Game: ${game ? game.id : 'n/a'} Player: ${player ? player.name : 'n/a'})`
+         + `\tEvent: ${event}`
+         + `\tData: ${JSON.stringify(data)}`
+      );
+      next();
+   });
+
    socket.on('hostGame', async () => {
       const questions = await getQuestionList(8),
             game = new GameModel(socket.id, questions);
