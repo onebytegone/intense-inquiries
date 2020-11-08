@@ -55,14 +55,8 @@ export default defineComponent({
    },
 
    setup: () => {
-      const isLoading = ref(true);
-
-      gameService.attemptToRejoinGame().then(() => {
-         isLoading.value = false;
-      });
-
       return {
-         isLoading,
+         isLoading: gameService.isWaiting,
          view: computed(() => {
             const game = gameService.game.value,
                   isHost = gameService.isHost.value;

@@ -98,5 +98,5 @@ export interface ServerEvents {
    gameUpdate: (state: GameState) => void;
    gameEnd: void;
    connect: void;
-   disconnect: void;
+   disconnect: (reason: string) => void;
 }
